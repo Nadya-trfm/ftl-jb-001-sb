@@ -1,8 +1,10 @@
 package com.foodtech.blog.user.service;
 
 import com.foodtech.blog.user.api.request.RegistrationRequest;
+import com.foodtech.blog.user.api.request.UserRequest;
 import com.foodtech.blog.user.api.response.UserResponse;
 import com.foodtech.blog.user.exeception.UserExistException;
+import com.foodtech.blog.user.exeception.UserNotExistException;
 import com.foodtech.blog.user.model.UserDoc;
 import com.foodtech.blog.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -57,5 +59,21 @@ public class UserApiService {
         query.skip(skip);
 
         return mongoTemplate.find(query, UserDoc.class);
+    }
+
+    public UserDoc update(UserRequest request) throws UserNotExistException {
+        Optional<UserDoc> userDocOptional = userRepository.findById(request.getId());
+        if(userDocOptional.isPresent() == false){
+            throw new UserNotExistException();
+        }
+        UserDoc userDoc = userDocOptional.get();
+        userDoc.setFirstName(request.getFirstName());
+        userDoc.setLastName(request.getLastName());
+        userDoc.setAddress(request.getAddress());
+        userDoc.setCompany(request.getCompany());
+
+        userRepository.save(userDoc);
+
+        return userDoc;
     }
 }

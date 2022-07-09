@@ -1,4 +1,4 @@
 package com.foodtech.blog.user.exeception;
 
-public class UserNotFound {
+public class UserNotExistException extends Exception{
 }
