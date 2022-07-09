@@ -12,6 +12,7 @@ import com.foodtech.blog.user.service.UserApiService;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -51,5 +52,11 @@ public class UserApiController {
         return UserMapping.getInstance().getResponseFull().convert(
                 userApiService.update(userRequest)
         );
+    }
+
+    @DeleteMapping(UserApiRoutes.BY_ID)
+    public String deleteById(@PathVariable ObjectId id){
+        userApiService.delete(id);
+        return HttpStatus.OK.toString();
     }
 }
