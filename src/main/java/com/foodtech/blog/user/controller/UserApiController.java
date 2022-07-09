@@ -31,9 +31,13 @@ public class UserApiController {
     );
     }
     @GetMapping(UserApiRoutes.ROOT)
-    public List<UserResponse> search(){
+    public List<UserResponse> search(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false, defaultValue = "1")Integer size,
+            @RequestParam(required = false,defaultValue = "0") Long skip
+    ){
         return  UserMapping.getInstance().getSearch().convert(
-                userApiService.search()
+                userApiService.search(query,size,skip)
         );
     }
 }
