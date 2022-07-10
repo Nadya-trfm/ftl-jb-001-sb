@@ -1,5 +1,6 @@
 package com.foodtech.blog.user.api.response;
 
+import io.swagger.annotations.ApiModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +11,7 @@ import org.bson.types.ObjectId;
 @Setter
 @SuperBuilder
 @AllArgsConstructor
+@ApiModel(value ="UserResponse",description = "user data(for search and list)")
 public class UserResponse {
     protected String id;
     protected String firstName;
