@@ -69,9 +69,10 @@ public class ArticleApiService {
         if(articleDocOptional.isPresent() == false){
             throw new ArticleNotExistException();
         }
-        ArticleDoc articleDoc = articleDocOptional.get();
+        ArticleDoc oldDoc = articleDocOptional.get();
+        ArticleDoc articleDoc = ArticleMapping.getInstance().getRequest().convert(request);;
         articleDoc.setId(request.getId());
-
+    articleDoc.setOwnerId(oldDoc.getOwnerId());
         articleRepository.save(articleDoc);
 
         return articleDoc;
