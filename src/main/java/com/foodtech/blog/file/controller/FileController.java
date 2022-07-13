@@ -7,6 +7,7 @@ import com.foodtech.blog.file.api.response.FileResponse;
 import com.foodtech.blog.file.exeception.FileExistException;
 import com.foodtech.blog.file.exeception.FileNotExistException;
 import com.foodtech.blog.file.mapping.FileMapping;
+import com.foodtech.blog.file.model.FileDoc;
 import com.foodtech.blog.file.routes.FileApiRoutes;
 import com.foodtech.blog.file.service.FileApiService;
 import com.foodtech.blog.user.exeception.UserNotExistException;
@@ -44,6 +45,10 @@ public class FileController {
     public void byId( @ApiParam(value = "File id")
                           @PathVariable ObjectId id, HttpServletResponse response)
             throws ChangeSetPersister.NotFoundException, IOException {
+        FileDoc fileDoc = fileApiService.findByID(id).get();
+
+        response.addHeader("Content-Type",fileDoc.getContentType());
+        response.addHeader("Content-Disposition", ": attachment; filename*=UTF-8''"+fileDoc.getTitle());
         FileCopyUtils.copy(fileApiService.downloadById(id), response.getOutputStream());
     }
 

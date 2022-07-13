@@ -1,13 +1,17 @@
-package com.foodtech.blog.file.service;
+package com.foodtech.blog.photo.service;
 
+import com.foodtech.blog.album.exeception.AlbumNotExistException;
+import com.foodtech.blog.album.repository.AlbumRepository;
 import com.foodtech.blog.base.api.request.SearchRequest;
-import com.foodtech.blog.base.api.response.SearchResponse;;
-import com.foodtech.blog.file.mapping.FileMapping;
-import com.foodtech.blog.file.api.response.FileResponse;
-import com.foodtech.blog.file.exeception.FileExistException;
-import com.foodtech.blog.file.exeception.FileNotExistException;
-import com.foodtech.blog.file.model.FileDoc;
-import com.foodtech.blog.file.repository.FileRepository;
+import com.foodtech.blog.base.api.response.SearchResponse;
+import com.foodtech.blog.photo.api.request.PhotoRequest;
+import com.foodtech.blog.photo.api.request.PhotoSearchRequest;
+import com.foodtech.blog.photo.mapping.PhotoMapping;
+import com.foodtech.blog.photo.api.response.PhotoResponse;
+import com.foodtech.blog.photo.exeception.PhotoExistException;
+import com.foodtech.blog.photo.exeception.PhotoNotExistException;
+import com.foodtech.blog.photo.model.PhotoDoc;
+import com.foodtech.blog.photo.repository.PhotoRepository;
 import com.foodtech.blog.user.exeception.UserNotExistException;
 import com.foodtech.blog.user.repository.UserRepository;
 import com.mongodb.BasicDBObject;
@@ -27,7 +31,6 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.text.ChangedCharSetException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -35,14 +38,16 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class FileApiService {
-    private final FileRepository fileRepository;
+public class PhotoApiService {
+    private final PhotoRepository photoRepository;
     private final MongoTemplate mongoTemplate;
+    private final AlbumRepository albumRepository;
+    private final UserRepository userRepository;
     private final GridFsTemplate gridFsTemplate;
     private final GridFsOperations operations;
-    private final UserRepository userRepository;
 
-    public FileDoc create(MultipartFile file, ObjectId ownerId) throws  IOException, UserNotExistException {
+    public PhotoDoc create(MultipartFile file, ObjectId ownerId, ObjectId albumId) throws AlbumNotExistException, UserNotExistException, IOException {
+        if(albumRepository.findById(albumId).isEmpty()) throw new AlbumNotExistException();
         if(userRepository.findById(ownerId).isEmpty()) throw new UserNotExistException();
 
         DBObject metaData = new BasicDBObject();
@@ -53,19 +58,15 @@ public class FileApiService {
                 file.getInputStream(), file.getOriginalFilename(), file.getContentType(), metaData
         );
 
-        FileDoc fileDoc = FileDoc.builder()
+        PhotoDoc photoDoc = PhotoDoc.builder()
                 .id(id)
+                .albumId(albumId)
                 .title(file.getOriginalFilename())
                 .ownerId(ownerId)
                 .contentType(file.getContentType())
                 .build();
-
-        fileRepository.save(fileDoc);
-        return  fileDoc;
-    }
-
-    public Optional<FileDoc> findByID(ObjectId id){
-        return fileRepository.findById(id);
+        photoRepository.save(photoDoc);
+        return  photoDoc;
     }
 
     public InputStream downloadById(ObjectId id) throws ChangeSetPersister.NotFoundException, IOException {
@@ -74,28 +75,48 @@ public class FileApiService {
         return operations.getResource(file).getInputStream();
     }
 
-    public SearchResponse<FileDoc> search(
-             SearchRequest request
+    public Optional<PhotoDoc> findByID(ObjectId id){
+        return photoRepository.findById(id);
+    }
+    public SearchResponse<PhotoDoc> search(
+             PhotoSearchRequest request
     ){
-        Criteria criteria = new Criteria();
+        Criteria criteria = Criteria.where("albumId").is(request.getAlbumId());
         if(request.getQuery() != null && request.getQuery()!=""){
             criteria = criteria.orOperator(
-                   Criteria.where("title").regex(request.getQuery(), "i")
+                    Criteria.where("title").regex(request.getQuery(), "i")
 
             );
         }
 
         Query query = new Query(criteria);
-        Long count = mongoTemplate.count(query, FileDoc.class);
+        Long count = mongoTemplate.count(query, PhotoDoc.class);
         query.limit(request.getSize());
         query.skip(request.getSkip());
 
-        List<FileDoc> fileDocs = mongoTemplate.find(query, FileDoc.class);
-        return SearchResponse.of(fileDocs, count);
+        List<PhotoDoc> photoDocs = mongoTemplate.find(query, PhotoDoc.class);
+        return SearchResponse.of(photoDocs, count);
+    }
+
+    public PhotoDoc update(PhotoRequest request) throws PhotoNotExistException {
+        Optional<PhotoDoc> photoDocOptional = photoRepository.findById(request.getId());
+        if(photoDocOptional.isPresent() == false){
+            throw new PhotoNotExistException();
+        }
+        PhotoDoc oldDoc = photoDocOptional.get();
+        PhotoDoc photoDoc = PhotoMapping.getInstance().getRequest().convert(request);
+
+        photoDoc.setId(request.getId());
+        photoDoc.setAlbumId(oldDoc.getAlbumId());
+        photoDoc.setOwnerId(oldDoc.getOwnerId());
+        photoDoc.setContentType(oldDoc.getContentType());
+        photoRepository.save(photoDoc);
+
+        return photoDoc;
     }
 
     public void delete(ObjectId id){
         gridFsTemplate.delete(new Query(Criteria.where("_id").is(id)));
-        fileRepository.deleteById(id);
+        photoRepository.deleteById(id);
     }
 }

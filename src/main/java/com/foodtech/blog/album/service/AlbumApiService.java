@@ -9,6 +9,10 @@ import com.foodtech.blog.album.exeception.AlbumExistException;
 import com.foodtech.blog.album.exeception.AlbumNotExistException;
 import com.foodtech.blog.album.model.AlbumDoc;
 import com.foodtech.blog.album.repository.AlbumRepository;
+import com.foodtech.blog.photo.api.request.PhotoSearchRequest;
+import com.foodtech.blog.photo.model.PhotoDoc;
+import com.foodtech.blog.photo.repository.PhotoRepository;
+import com.foodtech.blog.photo.service.PhotoApiService;
 import com.foodtech.blog.user.exeception.UserNotExistException;
 import com.foodtech.blog.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +34,7 @@ public class AlbumApiService {
     private final AlbumRepository albumRepository;
     private final MongoTemplate mongoTemplate;
     private final UserRepository userRepository;
+    private final PhotoApiService photoApiService;
 
     public AlbumDoc create(AlbumRequest request) throws AlbumExistException, UserNotExistException {
         if(userRepository.findById(request.getOwnerId()).isEmpty()) throw new UserNotExistException();
@@ -79,7 +84,14 @@ public class AlbumApiService {
     }
 
     public void delete(ObjectId id) {
+        List<PhotoDoc> photoDocs = photoApiService
+                .search(PhotoSearchRequest.builder().albumId(id).size(10000).build())
+                .getList();
+
+        for(PhotoDoc photoDoc: photoDocs){
+            photoApiService.delete(photoDoc.getId());
+        }
+
         albumRepository.deleteById(id);
-        //TODO: delete photo
     }
 }

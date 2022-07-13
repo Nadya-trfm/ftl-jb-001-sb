@@ -1,4 +1,4 @@
-package com.foodtech.blog.file.model;
+package com.foodtech.blog.photo.model;
 
 import lombok.*;
 import org.bson.types.ObjectId;
@@ -12,10 +12,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class FileDoc {
+public class PhotoDoc {
     @Id
      private ObjectId id;
      private String title;
      private ObjectId ownerId;
+     private ObjectId albumId;
      private String contentType;
 }

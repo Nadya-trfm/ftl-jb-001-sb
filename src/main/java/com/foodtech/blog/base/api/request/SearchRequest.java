@@ -1,11 +1,15 @@
 package com.foodtech.blog.base.api.request;
 
 import io.swagger.annotations.ApiParam;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.springframework.context.annotation.Bean;
 
 @Getter
 @Setter
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SearchRequest {
     @ApiParam(name = "query", value = "Search by fields", required = false)
     protected String query = null;
