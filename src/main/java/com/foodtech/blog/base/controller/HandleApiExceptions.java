@@ -1,5 +1,7 @@
 package com.foodtech.blog.base.controller;
 
+import com.foodtech.blog.auth.exceptions.AuthException;
+import com.foodtech.blog.auth.exceptions.NotAccessException;
 import com.foodtech.blog.base.api.response.ErrorResponse;
 import com.foodtech.blog.user.exeception.UserExistException;
 import com.foodtech.blog.user.exeception.UserNotExistException;
@@ -39,6 +41,16 @@ public class HandleApiExceptions extends ResponseEntityExceptionHandler {
     @ExceptionHandler(UserNotExistException.class)
     public ResponseEntity<Object> userNotExistException(UserNotExistException ex, WebRequest request){
         return buildResponseEntity(ErrorResponse.of("UserNotExistException", HttpStatus.BAD_REQUEST));
+    }
+
+    @ExceptionHandler(AuthException.class)
+    public ResponseEntity<Object> authException(AuthException ex, WebRequest request){
+        return buildResponseEntity(ErrorResponse.of("AuthException", HttpStatus.UNAUTHORIZED));
+    }
+
+    @ExceptionHandler(NotAccessException.class)
+    public ResponseEntity<Object> notAccessException(NotAccessException ex, WebRequest request){
+        return buildResponseEntity(ErrorResponse.of("NotAccessException", HttpStatus.FORBIDDEN));
     }
 
     @ExceptionHandler(Exception.class)
