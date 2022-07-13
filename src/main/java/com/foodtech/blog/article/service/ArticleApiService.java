@@ -70,7 +70,7 @@ public class ArticleApiService {
             throw new ArticleNotExistException();
         }
         ArticleDoc oldDoc = articleDocOptional.get();
-        ArticleDoc articleDoc = ArticleMapping.getInstance().getRequest().convert(request);;
+        ArticleDoc articleDoc = ArticleMapping.getInstance().getRequest().convert(request);
         articleDoc.setId(request.getId());
     articleDoc.setOwnerId(oldDoc.getOwnerId());
         articleRepository.save(articleDoc);
