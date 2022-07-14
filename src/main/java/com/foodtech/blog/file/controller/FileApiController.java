@@ -1,5 +1,7 @@
 package com.foodtech.blog.file.controller;
 
+import com.foodtech.blog.auth.exceptions.AuthException;
+import com.foodtech.blog.auth.exceptions.NotAccessException;
 import com.foodtech.blog.base.api.request.SearchRequest;
 import com.foodtech.blog.base.api.response.OkResponse;
 import com.foodtech.blog.base.api.response.SearchResponse;
@@ -54,7 +56,7 @@ public class FileApiController {
     @ApiResponses(value={
             @ApiResponse(code = 200,message = "Success")
     })
-    public OkResponse<String> deleteById(@ApiParam(value = "File id") @PathVariable ObjectId id){
+    public OkResponse<String> deleteById(@ApiParam(value = "File id") @PathVariable ObjectId id) throws NotAccessException, AuthException, ChangeSetPersister.NotFoundException {
         fileApiService.delete(id);
         return OkResponse.of(HttpStatus.OK.toString());
     }

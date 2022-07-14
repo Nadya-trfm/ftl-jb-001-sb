@@ -3,6 +3,8 @@ package com.foodtech.blog.base.controller;
 import com.foodtech.blog.auth.exceptions.AuthException;
 import com.foodtech.blog.auth.exceptions.NotAccessException;
 import com.foodtech.blog.base.api.response.ErrorResponse;
+import com.foodtech.blog.comment.exeception.CommentNotExistException;
+import com.foodtech.blog.todoTask.exeception.TodoTaskNotExistException;
 import com.foodtech.blog.user.exeception.UserExistException;
 import com.foodtech.blog.user.exeception.UserNotExistException;
 import org.springframework.data.crossstore.ChangeSetPersister;
@@ -46,6 +48,15 @@ public class HandleApiExceptions extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<Object> authException(AuthException ex, WebRequest request){
         return buildResponseEntity(ErrorResponse.of("AuthException", HttpStatus.UNAUTHORIZED));
+    }
+
+    @ExceptionHandler(TodoTaskNotExistException.class)
+    public ResponseEntity<Object> todoTaskNotExistException(TodoTaskNotExistException ex, WebRequest request){
+        return buildResponseEntity(ErrorResponse.of("TodoTaskNotExistException", HttpStatus.NOT_FOUND));
+    }
+    @ExceptionHandler(CommentNotExistException.class)
+    public ResponseEntity<Object> commentNotExistException(CommentNotExistException ex, WebRequest request){
+        return buildResponseEntity(ErrorResponse.of("CommentNotExistException", HttpStatus.NOT_FOUND));
     }
 
     @ExceptionHandler(NotAccessException.class)

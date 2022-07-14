@@ -1,6 +1,8 @@
 package com.foodtech.blog.comment.controller;
 
 import com.foodtech.blog.article.exeception.ArticleNotExistException;
+import com.foodtech.blog.auth.exceptions.AuthException;
+import com.foodtech.blog.auth.exceptions.NotAccessException;
 import com.foodtech.blog.base.api.request.SearchRequest;
 import com.foodtech.blog.base.api.response.OkResponse;
 import com.foodtech.blog.base.api.response.SearchResponse;
@@ -34,7 +36,7 @@ public class CommentApiController {
            @ApiResponse(code = 200,message = "Success"),
            @ApiResponse(code = 400,message = "Comment already exist")
     })
-    public OkResponse<CommentResponse> create(@RequestBody CommentRequest request) throws CommentExistException, ArticleNotExistException, UserNotExistException {
+    public OkResponse<CommentResponse> create(@RequestBody CommentRequest request) throws CommentExistException, ArticleNotExistException, UserNotExistException, AuthException {
         return OkResponse.of(CommentMapping.getInstance().getResponse().convert(commentApiService.create(request)));
     }
 
@@ -71,7 +73,7 @@ public class CommentApiController {
     public OkResponse<CommentResponse> updateById(
             @ApiParam(value = "Comment id") @PathVariable String id,
             @RequestBody CommentRequest commentRequest
-            ) throws CommentNotExistException {
+            ) throws CommentNotExistException, NotAccessException, AuthException {
         return OkResponse.of(CommentMapping.getInstance().getResponse().convert(
                 commentApiService.update(commentRequest)
         ));
@@ -82,7 +84,7 @@ public class CommentApiController {
     @ApiResponses(value={
             @ApiResponse(code = 200,message = "Success")
     })
-    public OkResponse<String> deleteById(@ApiParam(value = "Comment id") @PathVariable ObjectId id){
+    public OkResponse<String> deleteById(@ApiParam(value = "Comment id") @PathVariable ObjectId id) throws NotAccessException, AuthException, ChangeSetPersister.NotFoundException {
         commentApiService.delete(id);
         return OkResponse.of(HttpStatus.OK.toString());
     }

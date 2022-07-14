@@ -14,7 +14,6 @@ import java.util.List;
 public class TodoTaskRequest {
             private ObjectId id;
             private String title;
-            private ObjectId ownerId;
             private Boolean completed;
             private List<ObjectId> files;
 }

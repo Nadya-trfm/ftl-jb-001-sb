@@ -1,4 +1,4 @@
-package com.foodtech.blog.user.model;
+package com.foodtech.blog.base.api.model;
 
 import lombok.*;
 import org.bson.types.ObjectId;

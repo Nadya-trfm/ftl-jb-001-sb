@@ -1,4 +1,4 @@
-package com.foodtech.blog.user.model;
+package com.foodtech.blog.base.api.model;
 
 import io.swagger.annotations.ApiModel;
 import lombok.*;

@@ -1,41 +1,39 @@
 package com.foodtech.blog.article.service;
 
 import com.foodtech.blog.article.mapping.ArticleMapping;
+import com.foodtech.blog.auth.exceptions.AuthException;
+import com.foodtech.blog.auth.exceptions.NotAccessException;
+import com.foodtech.blog.auth.service.AuthService;
 import com.foodtech.blog.base.api.request.SearchRequest;
 import com.foodtech.blog.base.api.response.SearchResponse;
 import com.foodtech.blog.article.api.request.ArticleRequest;
 
-import com.foodtech.blog.article.exeception.ArticleExistException;
 import com.foodtech.blog.article.exeception.ArticleNotExistException;
 import com.foodtech.blog.article.model.ArticleDoc;
 import com.foodtech.blog.article.repository.ArticleRepository;
-import com.foodtech.blog.user.exeception.UserNotExistException;
-import com.foodtech.blog.user.model.UserDoc;
-import com.foodtech.blog.user.repository.UserRepository;
+import com.foodtech.blog.base.servise.CheckAccess;
+import com.foodtech.blog.base.api.model.UserDoc;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class ArticleApiService {
+public class ArticleApiService extends CheckAccess<ArticleDoc> {
     private final ArticleRepository articleRepository;
     private final MongoTemplate mongoTemplate;
-    private final UserRepository userRepository;
+    private final AuthService authService;
 
-    public ArticleDoc create(ArticleRequest request) throws ArticleExistException, UserNotExistException {
-        Optional<UserDoc> userDoc = userRepository.findById(request.getOwnerId());
-        if(userDoc.isPresent() == false) throw new UserNotExistException();
-        ArticleDoc articleDoc = ArticleMapping.getInstance().getRequest().convert(request);
+    public ArticleDoc create(ArticleRequest request) throws AuthException {
+        UserDoc userDoc = authService.currentUser();
+        ArticleDoc articleDoc = ArticleMapping.getInstance().getRequest().convert(request, userDoc.getId());
         articleRepository.save(articleDoc);
         return  articleDoc;
     }
@@ -64,21 +62,34 @@ public class ArticleApiService {
         return SearchResponse.of(articleDocs, count);
     }
 
-    public ArticleDoc update(ArticleRequest request) throws ArticleNotExistException {
+    public ArticleDoc update(ArticleRequest request) throws ArticleNotExistException, AuthException, NotAccessException {
         Optional<ArticleDoc> articleDocOptional = articleRepository.findById(request.getId());
         if(articleDocOptional.isPresent() == false){
             throw new ArticleNotExistException();
         }
         ArticleDoc oldDoc = articleDocOptional.get();
-        ArticleDoc articleDoc = ArticleMapping.getInstance().getRequest().convert(request);
+        UserDoc owner = checkAccess(oldDoc);
+
+        ArticleDoc articleDoc = ArticleMapping.getInstance().getRequest().convert(request, owner.getId());
         articleDoc.setId(request.getId());
-    articleDoc.setOwnerId(oldDoc.getOwnerId());
+        articleDoc.setOwnerId(oldDoc.getOwnerId());
         articleRepository.save(articleDoc);
 
         return articleDoc;
     }
 
-    public void delete(ObjectId id){
+    public void delete(ObjectId id) throws NotAccessException, AuthException, ChangeSetPersister.NotFoundException {
+        checkAccess(articleRepository.findById(id).orElseThrow(ChangeSetPersister.NotFoundException::new));
         articleRepository.deleteById(id);
+    }
+
+    @Override
+    protected ObjectId getOwnerFromEntity(ArticleDoc entity) {
+        return entity.getOwnerId();
+    }
+
+    @Override
+    protected AuthService authService() {
+        return authService;
     }
 }

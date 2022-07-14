@@ -1,5 +1,7 @@
 package com.foodtech.blog.todoTask.controller;
 
+import com.foodtech.blog.auth.exceptions.AuthException;
+import com.foodtech.blog.auth.exceptions.NotAccessException;
 import com.foodtech.blog.base.api.request.SearchRequest;
 import com.foodtech.blog.base.api.response.OkResponse;
 import com.foodtech.blog.base.api.response.SearchResponse;
@@ -34,7 +36,7 @@ public class TodoTaskApiController {
            @ApiResponse(code = 200,message = "Success"),
            @ApiResponse(code = 400,message = "TodoTask already exist")
     })
-    public OkResponse<TodoTaskResponse> create(@RequestBody TodoTaskRequest request) throws TodoTaskExistException, UserNotExistException {
+    public OkResponse<TodoTaskResponse> create(@RequestBody TodoTaskRequest request) throws  AuthException {
         return OkResponse.of(TodoTaskMapping.getInstance().getResponse().convert(todoTaskApiService.create(request)));
     }
 
@@ -56,7 +58,7 @@ public class TodoTaskApiController {
     })
     public OkResponse<SearchResponse<TodoTaskResponse>> search(
             @ModelAttribute TodoTaskSearchRequest request
-            )throws ResponseStatusException {
+            ) throws ResponseStatusException, AuthException {
         return  OkResponse.of(TodoTaskMapping.getInstance().getSearch().convert(
                 todoTaskApiService.search(request)
         ));
@@ -71,7 +73,7 @@ public class TodoTaskApiController {
     public OkResponse<TodoTaskResponse> updateById(
             @ApiParam(value = "TodoTask id") @PathVariable String id,
             @RequestBody TodoTaskRequest todoTaskRequest
-            ) throws TodoTaskNotExistException {
+            ) throws TodoTaskNotExistException, NotAccessException, AuthException {
         return OkResponse.of(TodoTaskMapping.getInstance().getResponse().convert(
                 todoTaskApiService.update(todoTaskRequest)
         ));
@@ -82,7 +84,7 @@ public class TodoTaskApiController {
     @ApiResponses(value={
             @ApiResponse(code = 200,message = "Success")
     })
-    public OkResponse<String> deleteById(@ApiParam(value = "TodoTask id") @PathVariable ObjectId id){
+    public OkResponse<String> deleteById(@ApiParam(value = "TodoTask id") @PathVariable ObjectId id) throws NotAccessException, AuthException {
         todoTaskApiService.delete(id);
         return OkResponse.of(HttpStatus.OK.toString());
     }

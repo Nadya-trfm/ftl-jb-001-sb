@@ -17,21 +17,16 @@ import java.util.stream.Collectors;
 @Getter
 public class AlbumMapping {
 
-    public static class RequestMapping extends BaseMapping<AlbumRequest, AlbumDoc> {
+    public static class RequestMapping  {
 
-        @Override
-        public AlbumDoc convert(AlbumRequest albumRequest) {
+        public AlbumDoc convert(AlbumRequest albumRequest, ObjectId ownerId) {
             return AlbumDoc.builder()
                     .id(albumRequest.getId())
                     .title(albumRequest.getTitle())
-                    .ownerId(albumRequest.getOwnerId())
+                    .ownerId(ownerId)
                     .build();
         }
 
-        @Override
-        public AlbumRequest unmapping(AlbumDoc albumDoc) {
-            throw new RuntimeException("dont use this");
-        }
     }
 
     public static class ResponseMapping extends BaseMapping<AlbumDoc, AlbumResponse> {
