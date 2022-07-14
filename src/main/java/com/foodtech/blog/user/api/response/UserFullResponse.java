@@ -1,7 +1,7 @@
 package com.foodtech.blog.user.api.response;
 
-import com.foodtech.blog.user.model.Address;
-import com.foodtech.blog.user.model.Company;
+import com.foodtech.blog.base.api.model.Address;
+import com.foodtech.blog.base.api.model.Company;
 import io.swagger.annotations.ApiModel;
 import lombok.Getter;
 import lombok.Setter;

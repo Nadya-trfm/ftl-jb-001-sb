@@ -15,22 +15,17 @@ import java.util.stream.Collectors;
 @Getter
 public class ArticleMapping{
 
-    public static class RequestMapping extends BaseMapping<ArticleRequest,ArticleDoc>{
+    public static class RequestMapping {
 
-        @Override
-        public ArticleDoc convert(ArticleRequest articleRequest){
+        public ArticleDoc convert(ArticleRequest articleRequest, ObjectId ownerId){
             return ArticleDoc.builder()
                 .id(articleRequest.getId())
                 .title(articleRequest.getTitle())
                 .body(articleRequest.getBody())
-                .ownerId(articleRequest.getOwnerId())
+                .ownerId(ownerId)
             .build();
             }
 
-        @Override
-        public ArticleRequest unmapping(ArticleDoc articleDoc){
-            throw new RuntimeException("dont use this");
-            }
     }
 
     public static class ResponseMapping extends BaseMapping<ArticleDoc,ArticleResponse>{

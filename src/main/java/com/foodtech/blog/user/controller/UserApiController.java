@@ -1,5 +1,7 @@
 package com.foodtech.blog.user.controller;
 
+import com.foodtech.blog.auth.exceptions.AuthException;
+import com.foodtech.blog.auth.exceptions.NotAccessException;
 import com.foodtech.blog.base.api.request.SearchRequest;
 import com.foodtech.blog.base.api.response.OkResponse;
 import com.foodtech.blog.base.api.response.SearchResponse;
@@ -61,7 +63,7 @@ public class UserApiController {
     public OkResponse<UserFullResponse> updateById(
             @ApiParam(value = "user id") @PathVariable String id,
             @RequestBody UserRequest userRequest
-            ) throws UserNotExistException {
+            ) throws UserNotExistException, AuthException {
         return OkResponse.of(UserMapping.getInstance().getResponseFull().convert(
                 userApiService.update(userRequest)
         ));
@@ -72,7 +74,7 @@ public class UserApiController {
     @ApiResponses(value={
             @ApiResponse(code = 200,message = "Success")
     })
-    public OkResponse<String> deleteById(@ApiParam(value = "user id") @PathVariable ObjectId id){
+    public OkResponse<String> deleteById(@ApiParam(value = "user id") @PathVariable ObjectId id) throws NotAccessException, AuthException {
         userApiService.delete(id);
         return OkResponse.of(HttpStatus.OK.toString());
     }

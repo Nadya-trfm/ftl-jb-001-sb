@@ -5,31 +5,27 @@ import com.foodtech.blog.base.mapping.BaseMapping;
 import com.foodtech.blog.user.api.request.UserRequest;
 import com.foodtech.blog.user.api.response.UserFullResponse;
 import com.foodtech.blog.user.api.response.UserResponse;
-import com.foodtech.blog.user.model.UserDoc;
+import com.foodtech.blog.base.api.model.UserDoc;
 import lombok.Getter;
 import org.bson.types.ObjectId;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
 public class UserMapping {
-    public static class RequestMapping extends BaseMapping<UserRequest,UserDoc> {
+    public static class RequestMapping {
 
-        @Override
-        public UserDoc convert(UserRequest userRequest){
+        public UserDoc convert(UserRequest userRequest, ObjectId userId){
             return UserDoc.builder()
-                    .id(userRequest.getId())
+                    .id(userId)
                     .firstName(userRequest.getFirstName())
                     .lastName(userRequest.getLastName())
                     .email(userRequest.getEmail())
                     .build();
         }
 
-        @Override
-        public UserRequest unmapping(UserDoc userDoc) {
-            throw new RuntimeException("dont use this");
-        }
+
+
     }
     public static class ResponseMapping extends BaseMapping<UserDoc,UserResponse> {
        @Override

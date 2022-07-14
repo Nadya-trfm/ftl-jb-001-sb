@@ -1,6 +1,6 @@
 package com.foodtech.blog.user.repository;
 
-import com.foodtech.blog.user.model.UserDoc;
+import com.foodtech.blog.base.api.model.UserDoc;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;

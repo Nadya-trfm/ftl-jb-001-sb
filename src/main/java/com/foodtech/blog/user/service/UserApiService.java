@@ -1,23 +1,21 @@
 package com.foodtech.blog.user.service;
 
+import com.foodtech.blog.auth.exceptions.AuthException;
+import com.foodtech.blog.auth.exceptions.NotAccessException;
+import com.foodtech.blog.auth.service.AuthService;
 import com.foodtech.blog.base.api.request.SearchRequest;
 import com.foodtech.blog.base.api.response.SearchResponse;
 import com.foodtech.blog.user.api.request.RegistrationRequest;
 import com.foodtech.blog.user.api.request.UserRequest;
-import com.foodtech.blog.user.api.response.UserResponse;
 import com.foodtech.blog.user.exeception.UserExistException;
-import com.foodtech.blog.user.exeception.UserNotExistException;
-import com.foodtech.blog.user.model.UserDoc;
+import com.foodtech.blog.base.api.model.UserDoc;
 import com.foodtech.blog.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +25,7 @@ import java.util.Optional;
 public class UserApiService {
     private final UserRepository userRepository;
     private final MongoTemplate mongoTemplate;
+    private final AuthService authService;
 
     public UserDoc registration(RegistrationRequest request) throws UserExistException {
         if(userRepository.findByEmail(request.getEmail()).isPresent() == true){
@@ -63,12 +62,9 @@ public class UserApiService {
         return SearchResponse.of(userDocs, count);
     }
 
-    public UserDoc update(UserRequest request) throws UserNotExistException {
-        Optional<UserDoc> userDocOptional = userRepository.findById(request.getId());
-        if(userDocOptional.isPresent() == false){
-            throw new UserNotExistException();
-        }
-        UserDoc userDoc = userDocOptional.get();
+    public UserDoc update(UserRequest request) throws  AuthException {
+        UserDoc userDoc =authService.currentUser();
+
         userDoc.setFirstName(request.getFirstName());
         userDoc.setLastName(request.getLastName());
         userDoc.setAddress(request.getAddress());
@@ -79,7 +75,8 @@ public class UserApiService {
         return userDoc;
     }
 
-    public void delete(ObjectId id){
+    public void delete(ObjectId id) throws NotAccessException, AuthException {
+        if(authService.currentUser().getId().equals(id) == false) throw new NotAccessException();
         userRepository.deleteById(id);
     }
 }

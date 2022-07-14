@@ -1,6 +1,6 @@
 package com.foodtech.blog.auth.entity;
 
-import com.foodtech.blog.user.model.UserDoc;
+import com.foodtech.blog.base.api.model.UserDoc;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

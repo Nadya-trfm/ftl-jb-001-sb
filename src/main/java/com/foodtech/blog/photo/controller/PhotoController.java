@@ -1,6 +1,8 @@
 package com.foodtech.blog.photo.controller;
 
 import com.foodtech.blog.album.exeception.AlbumNotExistException;
+import com.foodtech.blog.auth.exceptions.AuthException;
+import com.foodtech.blog.auth.exceptions.NotAccessException;
 import com.foodtech.blog.base.api.response.OkResponse;
 import com.foodtech.blog.photo.api.response.PhotoResponse;
 import com.foodtech.blog.photo.mapping.PhotoMapping;
@@ -34,10 +36,9 @@ public class PhotoController {
     })
     public @ResponseBody OkResponse<PhotoResponse> create(
             @RequestParam MultipartFile file,
-            @RequestParam ObjectId ownerId,
             @RequestParam ObjectId albumId)
-            throws IOException, UserNotExistException, AlbumNotExistException {
-        return OkResponse.of(PhotoMapping.getInstance().getResponse().convert(photoApiService.create(file, ownerId, albumId)));
+            throws IOException,  AlbumNotExistException, NotAccessException, AuthException {
+        return OkResponse.of(PhotoMapping.getInstance().getResponse().convert(photoApiService.create(file, albumId)));
     }
 
     @GetMapping(PhotoApiRoutes.DOWNLOAD)

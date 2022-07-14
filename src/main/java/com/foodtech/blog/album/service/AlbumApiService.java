@@ -1,45 +1,45 @@
 package com.foodtech.blog.album.service;
 
+import com.foodtech.blog.auth.exceptions.AuthException;
+import com.foodtech.blog.auth.exceptions.NotAccessException;
+import com.foodtech.blog.auth.service.AuthService;
 import com.foodtech.blog.base.api.request.SearchRequest;
 import com.foodtech.blog.base.api.response.SearchResponse;
 import com.foodtech.blog.album.api.request.AlbumRequest;
 import com.foodtech.blog.album.mapping.AlbumMapping;
-import com.foodtech.blog.album.api.response.AlbumResponse;
 import com.foodtech.blog.album.exeception.AlbumExistException;
 import com.foodtech.blog.album.exeception.AlbumNotExistException;
 import com.foodtech.blog.album.model.AlbumDoc;
 import com.foodtech.blog.album.repository.AlbumRepository;
+import com.foodtech.blog.base.servise.CheckAccess;
 import com.foodtech.blog.photo.api.request.PhotoSearchRequest;
 import com.foodtech.blog.photo.model.PhotoDoc;
-import com.foodtech.blog.photo.repository.PhotoRepository;
 import com.foodtech.blog.photo.service.PhotoApiService;
 import com.foodtech.blog.user.exeception.UserNotExistException;
-import com.foodtech.blog.user.repository.UserRepository;
+import com.foodtech.blog.base.api.model.UserDoc;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class AlbumApiService {
+public class AlbumApiService extends CheckAccess<AlbumDoc> {
     private final AlbumRepository albumRepository;
     private final MongoTemplate mongoTemplate;
-    private final UserRepository userRepository;
     private final PhotoApiService photoApiService;
+    private final AuthService authService;
 
-    public AlbumDoc create(AlbumRequest request) throws AlbumExistException, UserNotExistException {
-        if(userRepository.findById(request.getOwnerId()).isEmpty()) throw new UserNotExistException();
+    public AlbumDoc create(AlbumRequest request) throws AlbumExistException, UserNotExistException, AuthException {
+        UserDoc userDoc =authService.currentUser();
 
-        AlbumDoc albumDoc = AlbumMapping.getInstance().getRequest().convert(request);
+        AlbumDoc albumDoc = AlbumMapping.getInstance().getRequest().convert(request, userDoc.getId());
         albumRepository.save(albumDoc);
         return albumDoc;
     }
@@ -68,14 +68,16 @@ public class AlbumApiService {
         return SearchResponse.of(albumDocs, count);
     }
 
-    public AlbumDoc update(AlbumRequest request) throws AlbumNotExistException {
+    public AlbumDoc update(AlbumRequest request) throws AlbumNotExistException, AuthException, NotAccessException {
         Optional<AlbumDoc> albumDocOptional = albumRepository.findById(request.getId());
         if (albumDocOptional.isPresent() == false) {
             throw new AlbumNotExistException();
         }
         AlbumDoc oldDoc = albumDocOptional.get();
-        AlbumDoc albumDoc = AlbumMapping.getInstance().getRequest().convert(request);
-        ;
+        UserDoc owner = checkAccess(oldDoc);
+
+        AlbumDoc albumDoc = AlbumMapping.getInstance().getRequest().convert(request,owner.getId());
+
         albumDoc.setId(request.getId());
         albumDoc.setOwnerId(oldDoc.getOwnerId());
         albumRepository.save(albumDoc);
@@ -83,7 +85,8 @@ public class AlbumApiService {
         return albumDoc;
     }
 
-    public void delete(ObjectId id) {
+    public void delete(ObjectId id) throws AuthException, NotAccessException, ChangeSetPersister.NotFoundException {
+        checkAccess(albumRepository.findById(id).orElseThrow(ChangeSetPersister.NotFoundException::new));
         List<PhotoDoc> photoDocs = photoApiService
                 .search(PhotoSearchRequest.builder().albumId(id).size(10000).build())
                 .getList();
@@ -93,5 +96,15 @@ public class AlbumApiService {
         }
 
         albumRepository.deleteById(id);
+    }
+
+    @Override
+    protected ObjectId getOwnerFromEntity(AlbumDoc entity) {
+        return entity.getOwnerId();
+    }
+
+    @Override
+    protected AuthService authService() {
+        return this.authService;
     }
 }

@@ -17,23 +17,18 @@ import java.util.stream.Collectors;
 @Getter
 public class TodoTaskMapping{
 
-    public static class RequestMapping extends BaseMapping<TodoTaskRequest,TodoTaskDoc>{
+    public static class RequestMapping {
 
-        @Override
-        public TodoTaskDoc convert(TodoTaskRequest todoTaskRequest){
+        public TodoTaskDoc convert(TodoTaskRequest todoTaskRequest, ObjectId ownerId){
             return TodoTaskDoc.builder()
                 .id(todoTaskRequest.getId())
                 .title(todoTaskRequest.getTitle())
-                .ownerId(todoTaskRequest.getOwnerId())
+                .ownerId(ownerId)
                 .completed(todoTaskRequest.getCompleted())
                 .files(todoTaskRequest.getFiles())
             .build();
             }
 
-        @Override
-        public TodoTaskRequest unmapping(TodoTaskDoc todoTaskDoc){
-            throw new RuntimeException("dont use this");
-            }
     }
 
     public static class ResponseMapping extends BaseMapping<TodoTaskDoc,TodoTaskResponse>{
