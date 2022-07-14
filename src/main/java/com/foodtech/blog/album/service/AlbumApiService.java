@@ -11,7 +11,7 @@ import com.foodtech.blog.album.exeception.AlbumExistException;
 import com.foodtech.blog.album.exeception.AlbumNotExistException;
 import com.foodtech.blog.album.model.AlbumDoc;
 import com.foodtech.blog.album.repository.AlbumRepository;
-import com.foodtech.blog.base.servise.CheckAccess;
+import com.foodtech.blog.base.service.CheckAccess;
 import com.foodtech.blog.photo.api.request.PhotoSearchRequest;
 import com.foodtech.blog.photo.model.PhotoDoc;
 import com.foodtech.blog.photo.service.PhotoApiService;

@@ -3,6 +3,7 @@ package com.foodtech.blog.auth.service;
 import com.foodtech.blog.auth.api.request.AuthRequest;
 import com.foodtech.blog.auth.entity.CustomUserDetails;
 import com.foodtech.blog.auth.exceptions.AuthException;
+import com.foodtech.blog.base.service.EmailSenderService;
 import com.foodtech.blog.security.JwtFilter;
 import com.foodtech.blog.security.JwtProvider;
 import com.foodtech.blog.user.exeception.UserNotExistException;
@@ -22,6 +23,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final JwtProvider jwtProvider;
+    private final EmailSenderService emailSenderService;
 
     public CustomUserDetails loadUserByEmail(String email) throws UserNotExistException {
         UserDoc userDoc = userRepository.findByEmail(email).orElseThrow(UserNotExistException::new);
@@ -34,6 +36,9 @@ public class AuthService {
             userDoc.setFailLogin(userDoc.getFailLogin() + 1);
             userRepository.save(userDoc);
 
+            if(userDoc.getFailLogin() >= 5){
+                emailSenderService.sendEmailAlert(userDoc.getEmail());
+            }
             throw new AuthException();
         }
 

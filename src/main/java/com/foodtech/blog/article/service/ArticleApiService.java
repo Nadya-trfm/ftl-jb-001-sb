@@ -11,7 +11,7 @@ import com.foodtech.blog.article.api.request.ArticleRequest;
 import com.foodtech.blog.article.exeception.ArticleNotExistException;
 import com.foodtech.blog.article.model.ArticleDoc;
 import com.foodtech.blog.article.repository.ArticleRepository;
-import com.foodtech.blog.base.servise.CheckAccess;
+import com.foodtech.blog.base.service.CheckAccess;
 import com.foodtech.blog.base.api.model.UserDoc;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;

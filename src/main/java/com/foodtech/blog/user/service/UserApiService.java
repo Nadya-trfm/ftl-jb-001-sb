@@ -5,6 +5,7 @@ import com.foodtech.blog.auth.exceptions.NotAccessException;
 import com.foodtech.blog.auth.service.AuthService;
 import com.foodtech.blog.base.api.request.SearchRequest;
 import com.foodtech.blog.base.api.response.SearchResponse;
+import com.foodtech.blog.base.service.EmailSenderService;
 import com.foodtech.blog.user.api.request.RegistrationRequest;
 import com.foodtech.blog.user.api.request.UserRequest;
 import com.foodtech.blog.user.exeception.UserExistException;
@@ -26,6 +27,7 @@ public class UserApiService {
     private final UserRepository userRepository;
     private final MongoTemplate mongoTemplate;
     private final AuthService authService;
+    private final EmailSenderService emailSenderService;
 
     public UserDoc registration(RegistrationRequest request) throws UserExistException {
         if(userRepository.findByEmail(request.getEmail()).isPresent() == true){
@@ -35,6 +37,9 @@ public class UserApiService {
         userDoc.setEmail(request.getEmail());
         userDoc.setPassword(UserDoc.hexPassword(request.getPassword()));
         userDoc = userRepository.save(userDoc);
+
+        emailSenderService.sendEmailRegistration(request.getEmail());
+
         return  userDoc;
     }
 

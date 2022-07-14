@@ -6,7 +6,7 @@ import com.foodtech.blog.auth.exceptions.AuthException;
 import com.foodtech.blog.auth.exceptions.NotAccessException;
 import com.foodtech.blog.auth.service.AuthService;
 import com.foodtech.blog.base.api.response.SearchResponse;
-import com.foodtech.blog.base.servise.CheckAccess;
+import com.foodtech.blog.base.service.CheckAccess;
 import com.foodtech.blog.comment.api.request.CommentRequest;
 import com.foodtech.blog.comment.api.request.CommentSearchRequest;
 import com.foodtech.blog.comment.mapping.CommentMapping;

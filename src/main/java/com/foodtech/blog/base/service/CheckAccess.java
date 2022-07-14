@@ -1,4 +1,4 @@
-package com.foodtech.blog.base.servise;
+package com.foodtech.blog.base.service;
 
 import com.foodtech.blog.auth.exceptions.AuthException;
 import com.foodtech.blog.auth.exceptions.NotAccessException;

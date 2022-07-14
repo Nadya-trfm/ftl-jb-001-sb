@@ -5,7 +5,7 @@ import com.foodtech.blog.auth.exceptions.NotAccessException;
 import com.foodtech.blog.auth.service.AuthService;
 import com.foodtech.blog.base.api.request.SearchRequest;
 import com.foodtech.blog.base.api.response.SearchResponse;;
-import com.foodtech.blog.base.servise.CheckAccess;
+import com.foodtech.blog.base.service.CheckAccess;
 import com.foodtech.blog.file.model.FileDoc;
 import com.foodtech.blog.file.repository.FileRepository;
 import com.foodtech.blog.base.api.model.UserDoc;
